@@ -169,6 +169,7 @@ export const updateProfile = [
         email,
         phone,
         address,
+        profilePicture: req.file ? req.file.path : null,
       });
 
       return res.status(200).json({

@@ -8,7 +8,7 @@ import { MenuCard } from './MenuCard';
 
 // Agrupa los platillos de una categoría (ENTRADA, PLATO_FUERTE, ...) bajo un
 // encabezado con icono. `section` viene ya agrupado y ordenado por useMenus.
-export function MenuSection({ section, onAddItem }) {
+export function MenuSection({ section, onAddItem, onPressItem }) {
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
 
@@ -22,9 +22,11 @@ export function MenuSection({ section, onAddItem }) {
         />
         <Text style={styles.title}>{section.title}</Text>
       </View>
-      {section.data.map((menu) => (
-        <MenuCard key={menu.id} menu={menu} onAdd={onAddItem} />
-      ))}
+      <View style={styles.grid}>
+        {section.data.map((menu) => (
+          <MenuCard key={menu.id} menu={menu} onAdd={onAddItem} onPress={onPressItem} />
+        ))}
+      </View>
     </View>
   );
 }
@@ -33,4 +35,5 @@ const createStyles = (colors) => StyleSheet.create({
   container: { gap: SPACING.sm },
   header: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.sm },
   title: { fontSize: FONT_SIZE.md, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.textSecondary },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: SPACING.md },
 });

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { Button, Card } from '../../../shared/components';
-import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
+import { Button, Card, IconCircle } from '../../../shared/components';
+import { FONTS, FONT_SIZE, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { confirmAction, notify } from '../../../shared/utils/confirm';
 import { useAccount } from '../hooks/useAccount';
@@ -42,9 +42,7 @@ export function DeleteAccountScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.iconCircle}>
-        <MaterialIcons name="warning-amber" size={36} color={colors.danger} />
-      </View>
+      <IconCircle icon="warning-amber" size={72} tone="danger" style={styles.iconCircle} />
       <Text style={styles.title}>Eliminar tu cuenta</Text>
       <Text style={styles.subtitle}>Antes de continuar, ten en cuenta que:</Text>
 
@@ -65,16 +63,7 @@ export function DeleteAccountScreen() {
 const createStyles = (colors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: SPACING.xl },
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: RADIUS.pill,
-    backgroundColor: colors.dangerBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginBottom: SPACING.lg,
-  },
+  iconCircle: { alignSelf: 'center', marginBottom: SPACING.lg },
   title: { fontSize: FONT_SIZE.xxl, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text, textAlign: 'center' },
   subtitle: {
     fontSize: FONT_SIZE.sm,

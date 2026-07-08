@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { Button, Card, EmptyState, Input, Selector, Stepper } from '../../../shared/components';
+import { Button, Card, DetailRow, EmptyState, Input, Selector, Stepper } from '../../../shared/components';
 import { ORDER_TYPES, SHIPPING_FEE } from '../../../shared/constants';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
@@ -142,25 +142,15 @@ export function CartScreen({ navigation }) {
         />
 
         <Card style={styles.summary}>
-          <SummaryRow label="Subtotal" value={formatCurrency(subtotal)} colors={colors} />
-          {shipping > 0 ? <SummaryRow label="Envío" value={formatCurrency(shipping)} colors={colors} /> : null}
+          <DetailRow label="Subtotal" value={formatCurrency(subtotal)} bordered={false} />
+          {shipping > 0 ? <DetailRow label="Envío" value={formatCurrency(shipping)} bordered={false} /> : null}
           <View style={styles.divider} />
-          <SummaryRow label="Total" value={formatCurrency(total)} colors={colors} strong />
+          <DetailRow label="Total" value={formatCurrency(total)} bordered={false} strong />
         </Card>
 
         <Button title="Confirmar pedido" gradient onPress={placeOrder} loading={submitting} />
       </ScrollView>
     </KeyboardAvoidingView>
-  );
-}
-
-function SummaryRow({ label, value, colors, strong }) {
-  const styles = createStyles(colors);
-  return (
-    <View style={styles.summaryRow}>
-      <Text style={[styles.summaryLabel, strong && styles.summaryStrong]}>{label}</Text>
-      <Text style={[styles.summaryValue, strong && styles.summaryStrong]}>{value}</Text>
-    </View>
   );
 }
 
@@ -177,9 +167,5 @@ const createStyles = (colors) => StyleSheet.create({
   itemPrice: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.bold, fontWeight: '800', color: colors.primary },
   itemActions: { alignItems: 'flex-end', gap: SPACING.xs },
   summary: { gap: SPACING.sm },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  summaryLabel: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.textSecondary },
-  summaryValue: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.text },
-  summaryStrong: { fontSize: FONT_SIZE.lg, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.border, marginVertical: SPACING.xs },
 });

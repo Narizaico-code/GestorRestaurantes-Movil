@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -6,15 +6,26 @@ import { Button, Input, Rating } from '../../../shared/components';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 
-// Modal para escribir una reseña (rating + comentario + nombre visible).
+// Modal para escribir o editar una reseña (rating + comentario + nombre visible).
 // Sólo maneja el formulario; la llamada a la API vive en el hook del padre.
-export function ReviewFormModal({ visible, onClose, onSubmit }) {
+// `initialValues` presente = modo edición; ausente/null = modo creación.
+export function ReviewFormModal({ visible, onClose, onSubmit, initialValues }) {
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
+  const isEdit = Boolean(initialValues);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [userName, setUserName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Recarga el formulario cada vez que se abre, con los valores de la reseña a
+  // editar o vacío para una nueva. Evita que queden datos de un uso anterior.
+  useEffect(() => {
+    if (!visible) return;
+    setRating(initialValues?.rating ?? 5);
+    setComment(initialValues?.comment ?? '');
+    setUserName(initialValues?.userName ?? '');
+  }, [visible, initialValues]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -27,7 +38,7 @@ export function ReviewFormModal({ visible, onClose, onSubmit }) {
       <View style={styles.overlay}>
         <View style={styles.card}>
           <View style={styles.header}>
-            <Text style={styles.title}>Escribir reseña</Text>
+            <Text style={styles.title}>{isEdit ? 'Editar reseña' : 'Escribir reseña'}</Text>
             <TouchableOpacity onPress={onClose}>
               <MaterialIcons name="close" size={24} color={colors.textMuted} />
             </TouchableOpacity>
@@ -53,7 +64,7 @@ export function ReviewFormModal({ visible, onClose, onSubmit }) {
             multiline
           />
 
-          <Button title="Publicar reseña" gradient onPress={submit} loading={submitting} />
+          <Button title={isEdit ? 'Guardar cambios' : 'Publicar reseña'} gradient onPress={submit} loading={submitting} />
         </View>
       </View>
     </Modal>

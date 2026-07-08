@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -6,14 +7,24 @@ import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/the
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 
 // Encabezado de perfil con gradiente de marca, avatar, nombre y correo.
+// Si la imagen no carga (ej. avatar por defecto roto en el servidor), cae al
+// ícono de placeholder en vez de dejar un hueco en blanco.
 export function ProfileHeader({ avatar, name, email }) {
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [avatar]);
+
+  const showImage = Boolean(avatar) && !imageFailed;
+
   return (
     <GradientCard contentStyle={styles.inner}>
       <View style={styles.avatarWrap}>
-        {avatar ? (
-          <Image source={{ uri: avatar }} style={styles.avatar} />
+        {showImage ? (
+          <Image source={{ uri: avatar }} style={styles.avatar} onError={() => setImageFailed(true)} />
         ) : (
           <View style={[styles.avatar, styles.avatarPlaceholder]}>
             <MaterialIcons name="person" size={34} color={colors.white} />

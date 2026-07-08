@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import path from 'path';
 import {
   User,
   UserProfile,
@@ -10,6 +12,7 @@ import {
   ADMIN_RESTAURANT_ROLE,
 } from './role-constants.js';
 import { hashPassword } from '../utils/password-utils.js';
+import { uploadImage } from './cloudinary-service.js';
 import { Op } from 'sequelize';
 
 /**
@@ -460,7 +463,7 @@ export const updateUserProfile = async (userId, profileData) => {
   const transaction = await User.sequelize.transaction();
 
   try {
-    const { name, email, phone, address } = profileData;
+    const { name, email, phone, address, profilePicture } = profileData;
 
     // Verificar si el nuevo email ya existe (si es diferente)
     if (email) {
@@ -490,18 +493,28 @@ export const updateUserProfile = async (userId, profileData) => {
       }
     );
 
+    // Si viene una foto nueva (archivo local subido por multer), súbela a
+    // Cloudinary igual que en el registro y guarda solo el nombre resultante.
+    let imagenToStore;
+    if (profilePicture) {
+      try {
+        const ext = path.extname(profilePicture);
+        const randomHex = crypto.randomBytes(6).toString('hex');
+        const cloudinaryFileName = `profile-${randomHex}${ext}`;
+        imagenToStore = await uploadImage(profilePicture, cloudinaryFileName);
+      } catch (err) {
+        console.error('Error subiendo foto de perfil en actualización:', err);
+      }
+    }
+
     // Actualizar perfil del usuario
-    if (phone || address !== undefined) {
-      await UserProfile.update(
-        {
-          Phone: phone,
-          Address: address,
-        },
-        {
-          where: { UserId: userId },
-          transaction,
-        }
-      );
+    if (phone || address !== undefined || imagenToStore) {
+      const profileUpdates = { Phone: phone, Address: address };
+      if (imagenToStore) profileUpdates.Imagen = imagenToStore;
+      await UserProfile.update(profileUpdates, {
+        where: { UserId: userId },
+        transaction,
+      });
     }
 
     await transaction.commit();

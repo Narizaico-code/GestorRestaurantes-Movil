@@ -1,9 +1,9 @@
 import { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../constants/theme';
 import { useThemeStore } from '../hooks/useThemeStore';
+import { IconCircle } from './IconCircle';
 
 // Captura errores de render de la pantalla hija para que NUNCA quede una página
 // en blanco: muestra un fallback con el mensaje del error y un botón de reintento.
@@ -27,9 +27,7 @@ export class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <View style={styles.container}>
-          <View style={styles.iconCircle}>
-            <MaterialIcons name="error-outline" size={36} color={colors.danger} />
-          </View>
+          <IconCircle icon="error-outline" size={64} tone="danger" style={styles.iconCircle} />
           <Text style={styles.title}>Algo salió mal</Text>
           <Text style={styles.message}>No se pudo mostrar esta pantalla.</Text>
           {this.state.error?.message ? (
@@ -70,15 +68,7 @@ const createStyles = (colors) => StyleSheet.create({
     gap: SPACING.sm,
     backgroundColor: colors.background,
   },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: RADIUS.pill,
-    backgroundColor: colors.dangerBg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.xs,
-  },
+  iconCircle: { marginBottom: SPACING.xs },
   title: { fontSize: FONT_SIZE.lg, fontFamily: FONTS.displayBold, fontWeight: '700', color: colors.text },
   message: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.textSecondary, textAlign: 'center' },
   detail: {

@@ -9,6 +9,7 @@ import { withErrorBoundary } from '../shared/components';
 import { HomeScreen } from '../features/home/screens/HomeScreen';
 import { RestaurantsScreen } from '../features/restaurants/screens/RestaurantsScreen';
 import { RestaurantDetailScreen } from '../features/restaurants/screens/RestaurantDetailScreen';
+import { MenuDetailScreen } from '../features/menus/screens/MenuDetailScreen';
 import { ReservationsScreen } from '../features/reservations/screens/ReservationsScreen';
 import { NewReservationScreen } from '../features/reservations/screens/NewReservationScreen';
 import { ReservationDetailScreen } from '../features/reservations/screens/ReservationDetailScreen';
@@ -20,6 +21,7 @@ import { EditProfileScreen } from '../features/profile/screens/EditProfileScreen
 import { ChangePasswordScreen } from '../features/profile/screens/ChangePasswordScreen';
 import { DeleteAccountScreen } from '../features/profile/screens/DeleteAccountScreen';
 import { PromotionsScreen } from '../features/promotions/screens/PromotionsScreen';
+import { InvoicesScreen } from '../features/invoices/screens/InvoicesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -29,6 +31,7 @@ const S = {
   Home: withErrorBoundary(HomeScreen),
   RestaurantsList: withErrorBoundary(RestaurantsScreen),
   RestaurantDetail: withErrorBoundary(RestaurantDetailScreen),
+  MenuDetail: withErrorBoundary(MenuDetailScreen),
   MyReservations: withErrorBoundary(ReservationsScreen),
   NewReservation: withErrorBoundary(NewReservationScreen),
   ReservationDetail: withErrorBoundary(ReservationDetailScreen),
@@ -40,6 +43,7 @@ const S = {
   ChangePassword: withErrorBoundary(ChangePasswordScreen),
   DeleteAccount: withErrorBoundary(DeleteAccountScreen),
   Promotions: withErrorBoundary(PromotionsScreen),
+  Invoices: withErrorBoundary(InvoicesScreen),
 };
 
 // Opciones de header devueltas dinámicamente según el tema.
@@ -70,6 +74,7 @@ function RestaurantsStack() {
     <RestaurantsStackNav.Navigator screenOptions={getStackScreenOptions(colors)}>
       <RestaurantsStackNav.Screen name="RestaurantsList" component={S.RestaurantsList} options={{ title: 'Restaurantes' }} />
       <RestaurantsStackNav.Screen name="RestaurantDetail" component={S.RestaurantDetail} options={{ title: 'Restaurante' }} />
+      <RestaurantsStackNav.Screen name="MenuDetail" component={S.MenuDetail} options={{ title: 'Platillo' }} />
     </RestaurantsStackNav.Navigator>
   );
 }
@@ -111,6 +116,7 @@ function ProfileStack() {
       <ProfileStackNav.Screen name="ChangePassword" component={S.ChangePassword} options={{ title: 'Cambiar Contraseña' }} />
       <ProfileStackNav.Screen name="DeleteAccount" component={S.DeleteAccount} options={{ title: 'Eliminar Cuenta' }} />
       <ProfileStackNav.Screen name="Promotions" component={S.Promotions} options={{ title: 'Promociones' }} />
+      <ProfileStackNav.Screen name="Invoices" component={S.Invoices} options={{ title: 'Mis Facturas' }} />
     </ProfileStackNav.Navigator>
   );
 }
