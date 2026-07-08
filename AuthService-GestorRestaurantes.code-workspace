@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "AuthService-GestorRestaurantes"
+		},
+		{
+			"path": "GestorRestaurantesBackend"
+		},
+		{
+			"path": "GestorRestaurantesFrontend"
+		},
+		{
+			"path": "Restaurante-Movil"
+		}
+	],
+	"settings": {}
+}
