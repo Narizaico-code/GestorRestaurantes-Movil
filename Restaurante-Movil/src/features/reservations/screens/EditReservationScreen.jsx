@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { Button, Card, Input } from '../../../shared/components';
+import { Button, Card } from '../../../shared/components';
 import { FONTS, FONT_SIZE, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { ReservationFormFields } from '../components/ReservationFormFields';
@@ -9,17 +9,19 @@ import { ReservationTableSelector } from '../components/ReservationTableSelector
 import { useReservationForm } from '../hooks/useReservationForm';
 import { useTables } from '../hooks/useTables';
 
-export function NewReservationScreen({ navigation, route }) {
+export function EditReservationScreen({ navigation, route }) {
   const { colors } = useThemeStore();
   const styles = createStyles(colors);
-  const restaurant = route.params?.restaurant;
-  const { tables, loading: tablesLoading } = useTables(restaurant?.id);
+  const reservation = route.params?.reservation;
+  const { tables, loading: tablesLoading } = useTables(reservation?.restaurantId);
 
   const { control, errors, type, setType, selectedTables, toggleTable, submit, submitting } = useReservationForm({
-    mode: 'create',
-    restaurant,
-    onSuccess: () => navigation.navigate('MyReservations'),
+    mode: 'edit',
+    reservation,
+    onSuccess: () => navigation.goBack(),
   });
+
+  if (!reservation) return null;
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -27,8 +29,7 @@ export function NewReservationScreen({ navigation, route }) {
         <Card style={styles.restaurantCard}>
           <MaterialIcons name="restaurant" size={22} color={colors.primary} />
           <View style={styles.flex}>
-            <Text style={styles.restaurantName}>{restaurant?.name || 'Restaurante'}</Text>
-            <Text style={styles.muted}>{restaurant?.hoursLabel}</Text>
+            <Text style={styles.restaurantName}>{reservation.restaurantName}</Text>
           </View>
         </Card>
 
@@ -41,7 +42,7 @@ export function NewReservationScreen({ navigation, route }) {
           onToggle={toggleTable}
         />
 
-        <Button title="Confirmar reservación" gradient onPress={submit} loading={submitting} />
+        <Button title="Guardar cambios" gradient onPress={submit} loading={submitting} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -52,5 +53,4 @@ const createStyles = (colors) => StyleSheet.create({
   content: { padding: SPACING.lg },
   restaurantCard: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md, marginBottom: SPACING.lg },
   restaurantName: { fontSize: FONT_SIZE.md, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.text },
-  muted: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.textMuted },
 });

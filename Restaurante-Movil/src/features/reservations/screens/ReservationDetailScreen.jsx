@@ -18,7 +18,7 @@ export function ReservationDetailScreen({ navigation, route }) {
 
   if (!reservation) return null;
 
-  const canCancel = reservation.status === RESERVATION_STATUS.PENDIENTE;
+  const canModify = reservation.status === RESERVATION_STATUS.PENDIENTE;
   const hasCoupon = Boolean(reservation.coupon);
 
   const onCancel = () =>
@@ -56,11 +56,7 @@ export function ReservationDetailScreen({ navigation, route }) {
           value={`${formatTime(reservation.startDate)} - ${formatTime(reservation.endDate)}`}
         />
         <DetailRow icon="group" label="Personas" value={String(reservation.numberPeople)} />
-        <DetailRow
-          icon="event-note"
-          label="Tipo"
-          value={RESERVATION_TYPE_LABELS[reservation.type] || reservation.type}
-        />
+        <DetailRow icon="event-note" label="Tipo" value={RESERVATION_TYPE_LABELS[reservation.type] || reservation.type} />
         <DetailRow
           icon="table-restaurant"
           label="Mesas"
@@ -77,8 +73,15 @@ export function ReservationDetailScreen({ navigation, route }) {
         </Card>
       ) : null}
 
-      {canCancel ? (
-        <Button title="Cancelar reservación" variant="danger" onPress={onCancel} loading={cancelling} />
+      {canModify ? (
+        <View style={styles.actions}>
+          <Button
+            title="Editar reservación"
+            variant="secondary"
+            onPress={() => navigation.navigate('EditReservation', { reservation })}
+          />
+          <Button title="Cancelar reservación" variant="danger" onPress={onCancel} loading={cancelling} />
+        </View>
       ) : null}
     </ScrollView>
   );
@@ -91,6 +94,7 @@ const createStyles = (colors) => StyleSheet.create({
   title: { flex: 1, fontSize: FONT_SIZE.xl, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text },
   photo: { width: '100%', height: 180, borderRadius: RADIUS.lg, backgroundColor: colors.surfaceAlt },
   card: { gap: 0 },
+  actions: { gap: SPACING.sm },
   descLabel: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.textSecondary, marginBottom: SPACING.xs },
   descText: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.text, lineHeight: 20 },
 });

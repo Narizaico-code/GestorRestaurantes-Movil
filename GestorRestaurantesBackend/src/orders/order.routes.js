@@ -9,7 +9,8 @@ import {
     getMyOrders,
     getOrdersByRestaurant,
     updateOrderStatus,
-    updateOrder
+    updateOrder,
+    cancelMyOrder
 } from './order.controller.js'
 import { uploadFieldImage } from '../../middlewares/file-uploader.js'
 import { createOrderValidator, updateOrderStatusValidator } from '../../middlewares/validateOrders.js'
@@ -28,6 +29,9 @@ router.get('/', validateJWT, isAdmin, getOrders)
 
 // Obtener órdenes del cliente actual
 router.get('/my-orders', validateJWT, getMyOrders)
+
+// Cancelar pedido propio (solo si sigue EN_PREPARACION)
+router.put('/my-order/:id/cancel', validateJWT, cancelMyOrder)
 
 // Obtener órdenes por restaurante
 router.get('/restaurant/:restaurantId', validateJWT, isAdmin, getOrdersByRestaurant)

@@ -80,3 +80,21 @@ export const combineDateTime = (dateStr, timeStr) => {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? null : date;
 };
+
+// Inversas de combineDateTime: de un ISO/Date a los strings que esperan los inputs de formulario.
+// Usan componentes en hora local (igual que combineDateTime al construir el Date).
+const pad2 = (n) => String(n).padStart(2, '0');
+
+export const toDateInputValue = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+};
+
+export const toTimeInputValue = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+};
