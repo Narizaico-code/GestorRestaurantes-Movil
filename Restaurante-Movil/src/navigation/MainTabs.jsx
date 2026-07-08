@@ -9,6 +9,7 @@ import { withErrorBoundary } from '../shared/components';
 import { HomeScreen } from '../features/home/screens/HomeScreen';
 import { RestaurantsScreen } from '../features/restaurants/screens/RestaurantsScreen';
 import { RestaurantDetailScreen } from '../features/restaurants/screens/RestaurantDetailScreen';
+import { MenuDetailScreen } from '../features/menus/screens/MenuDetailScreen';
 import { ReservationsScreen } from '../features/reservations/screens/ReservationsScreen';
 import { NewReservationScreen } from '../features/reservations/screens/NewReservationScreen';
 import { ReservationDetailScreen } from '../features/reservations/screens/ReservationDetailScreen';
@@ -29,6 +30,7 @@ const S = {
   Home: withErrorBoundary(HomeScreen),
   RestaurantsList: withErrorBoundary(RestaurantsScreen),
   RestaurantDetail: withErrorBoundary(RestaurantDetailScreen),
+  MenuDetail: withErrorBoundary(MenuDetailScreen),
   MyReservations: withErrorBoundary(ReservationsScreen),
   NewReservation: withErrorBoundary(NewReservationScreen),
   ReservationDetail: withErrorBoundary(ReservationDetailScreen),
@@ -70,6 +72,7 @@ function RestaurantsStack() {
     <RestaurantsStackNav.Navigator screenOptions={getStackScreenOptions(colors)}>
       <RestaurantsStackNav.Screen name="RestaurantsList" component={S.RestaurantsList} options={{ title: 'Restaurantes' }} />
       <RestaurantsStackNav.Screen name="RestaurantDetail" component={S.RestaurantDetail} options={{ title: 'Restaurante' }} />
+      <RestaurantsStackNav.Screen name="MenuDetail" component={S.MenuDetail} options={{ title: 'Platillo' }} />
     </RestaurantsStackNav.Navigator>
   );
 }

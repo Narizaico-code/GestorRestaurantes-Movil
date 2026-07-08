@@ -1,7 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
-import { Badge, Card } from '../../../shared/components';
+import { Badge, Card, DetailRow } from '../../../shared/components';
 import { ORDER_TYPES } from '../../../shared/constants';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
@@ -13,6 +12,9 @@ export function OrderDetailScreen({ route }) {
   const order = route.params?.order;
 
   if (!order) return null;
+
+  const hasDelivery = order.orderType === ORDER_TYPES.A_DOMICILIO && Boolean(order.deliveryAddress);
+  const hasCoupon = Boolean(order.coupon);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -38,30 +40,22 @@ export function OrderDetailScreen({ route }) {
       </Card>
 
       <Card style={styles.card}>
-        <DetailRow icon="lunch-dining" label="Tipo de pedido" value={order.orderTypeLabel} colors={colors} />
-        {order.orderType === ORDER_TYPES.A_DOMICILIO && order.deliveryAddress ? (
-          <DetailRow icon="location-on" label="Entrega" value={order.deliveryAddress} colors={colors} />
+        <DetailRow
+          icon="lunch-dining"
+          label="Tipo de pedido"
+          value={order.orderTypeLabel}
+          last={!hasDelivery && !hasCoupon}
+        />
+        {hasDelivery ? (
+          <DetailRow icon="location-on" label="Entrega" value={order.deliveryAddress} last={!hasCoupon} />
         ) : null}
-        {order.coupon ? <DetailRow icon="local-offer" label="Cupón" value={order.coupon} colors={colors} /> : null}
+        {hasCoupon ? <DetailRow icon="local-offer" label="Cupón" value={order.coupon} last /> : null}
         <View style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total</Text>
           <Text style={styles.totalValue}>{formatCurrency(order.total)}</Text>
         </View>
       </Card>
     </ScrollView>
-  );
-}
-
-function DetailRow({ icon, label, value, colors }) {
-  const styles = createStyles(colors);
-  return (
-    <View style={styles.detailRow}>
-      <View style={styles.detailLeft}>
-        <MaterialIcons name={icon} size={18} color={colors.primary} />
-        <Text style={styles.detailLabel}>{label}</Text>
-      </View>
-      <Text style={styles.detailValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -87,15 +81,6 @@ const createStyles = (colors) => StyleSheet.create({
   qtyText: { fontSize: FONT_SIZE.xs, fontFamily: FONTS.bold, fontWeight: '800', color: colors.primary },
   itemName: { flex: 1, fontSize: FONT_SIZE.sm, fontFamily: FONTS.medium, color: colors.text },
   itemPrice: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.text },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: SPACING.sm,
-  },
-  detailLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  detailLabel: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.textSecondary },
-  detailValue: { flex: 1, textAlign: 'right', fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.text },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

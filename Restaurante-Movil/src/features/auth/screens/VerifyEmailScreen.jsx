@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
 
-import { Button, Input } from '../../../shared/components';
+import { Button, IconCircle, Input } from '../../../shared/components';
 import { notify } from '../../../shared/utils/confirm';
-import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
+import { FONTS, FONT_SIZE, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { useAuth } from '../hooks/useAuth';
 
@@ -45,9 +44,7 @@ export function VerifyEmailScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.iconCircle}>
-          <MaterialIcons name="mark-email-read" size={38} color={colors.primary} />
-        </View>
+        <IconCircle icon="mark-email-read" size={76} style={styles.iconCircle} />
         <Text style={styles.title}>Verifica tu correo</Text>
         <Text style={styles.subtitle}>
           Enviamos un enlace de verificación{email ? ` a ${email}` : ''}. Pega aquí el código del enlace si prefieres
@@ -74,16 +71,7 @@ export function VerifyEmailScreen({ navigation, route }) {
 const createStyles = (colors) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   content: { padding: SPACING.xl, alignItems: 'stretch' },
-  iconCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: RADIUS.pill,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    alignSelf: 'center',
-    marginBottom: SPACING.lg,
-  },
+  iconCircle: { alignSelf: 'center', marginBottom: SPACING.lg },
   title: { fontSize: FONT_SIZE.xxl, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text, textAlign: 'center' },
   subtitle: {
     fontSize: FONT_SIZE.sm,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { authClient, getApiError } from '../../../shared/api';
+import { authClient, buildFormData, getApiError } from '../../../shared/api';
 import { useAuthStore } from '../../../shared/store/authStore';
 
 const mapToViewModel = (raw) => ({
@@ -40,17 +40,22 @@ export function useProfile() {
     fetchProfile();
   }, [fetchProfile]);
 
-  // PUT /users/profile (JSON). Requiere name + email; el teléfono debe tener 8 dígitos.
+  // PUT /users/profile (multipart). Requiere name + email; el teléfono debe
+  // tener 8 dígitos. `profilePicture` es la URI local de una foto nueva (opcional).
   const updateProfile = useCallback(
     async (form) => {
       try {
-        const res = await authClient.put('/users/profile', {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          address: form.address,
-        });
-        // Refleja el nombre/foto en el header (store global).
+        const formData = await buildFormData(
+          {
+            name: form.name,
+            email: form.email,
+            phone: form.phone,
+            address: form.address,
+          },
+          form.profilePicture ? { uri: form.profilePicture, field: 'profilePicture' } : null
+        );
+        const res = await authClient.put('/users/profile', formData);
+        // Refleja el nombre en el header (store global).
         setUser({ name: form.name });
         await fetchProfile();
         return { ok: true, data: res.data };

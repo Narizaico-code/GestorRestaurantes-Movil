@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,12 +7,13 @@ import { Button, LoadingSpinner, Rating } from '../../../shared/components';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { useCartStore } from '../../../shared/store/cartStore';
-import { notify } from '../../../shared/utils/confirm';
+import { confirmAction, notify } from '../../../shared/utils/confirm';
 import { formatCurrency } from '../../../shared/utils/format';
 import { MenuSection } from '../../menus/components/MenuSection';
 import { useMenus } from '../../menus/hooks/useMenus';
 import { ReviewCard } from '../../reviews/components/ReviewCard';
 import { ReviewFormModal } from '../../reviews/components/ReviewFormModal';
+import { useReviewFormController } from '../../reviews/hooks/useReviewFormController';
 import { useReviews } from '../../reviews/hooks/useReviews';
 import { useRestaurant } from '../hooks/useRestaurants';
 
@@ -23,13 +24,14 @@ export function RestaurantDetailScreen({ navigation, route }) {
   const initial = route.params?.restaurant;
   const { restaurant } = useRestaurant(initial?.id, initial);
   const { sections, loading: menusLoading } = useMenus(restaurant?.id);
-  const { reviews, average, count, createReview } = useReviews({ restaurantId: restaurant?.id });
+  const { reviews, average, count, createReview, updateReview, deleteReview } = useReviews({
+    restaurantId: restaurant?.id,
+  });
+  const reviewForm = useReviewFormController({ createReview, updateReview });
 
   const addItem = useCartStore((s) => s.addItem);
   const cartItems = useCartStore((s) => s.items);
   const cartRestaurantId = useCartStore((s) => s.restaurantId);
-
-  const [reviewOpen, setReviewOpen] = useState(false);
 
   const cartForThis = cartRestaurantId === restaurant?.id ? cartItems : [];
   const cartCount = cartForThis.reduce((sum, it) => sum + it.quantity, 0);
@@ -44,17 +46,24 @@ export function RestaurantDetailScreen({ navigation, route }) {
     [addItem, restaurant]
   );
 
-  const onSubmitReview = useCallback(
-    async ({ rating, comment, userName }) => {
-      const result = await createReview({ rating, comment, userName });
-      if (!result.ok) {
-        notify('Error', result.error);
-        return;
-      }
-      setReviewOpen(false);
-      notify('¡Gracias!', 'Tu reseña fue publicada.');
-    },
-    [createReview]
+  const onDeleteReview = useCallback(
+    (review) =>
+      confirmAction({
+        title: 'Eliminar reseña',
+        message: '¿Seguro que deseas eliminar tu reseña?',
+        confirmText: 'Eliminar',
+        destructive: true,
+        onConfirm: async () => {
+          const result = await deleteReview(review.id);
+          if (!result.ok) notify('Error', result.error);
+        },
+      }),
+    [deleteReview]
+  );
+
+  const onPressMenu = useCallback(
+    (menu) => navigation.navigate('MenuDetail', { menu, restaurant }),
+    [navigation, restaurant]
   );
 
   const goReserve = () =>
@@ -108,21 +117,23 @@ export function RestaurantDetailScreen({ navigation, route }) {
           <Text style={styles.muted}>Este restaurante aún no publicó su carta.</Text>
         ) : (
           sections.map((section) => (
-            <MenuSection key={section.category} section={section} onAddItem={onAdd} />
+            <MenuSection key={section.category} section={section} onAddItem={onAdd} onPressItem={onPressMenu} />
           ))
         )}
 
         {/* Reseñas */}
         <View style={styles.reviewsHeader}>
           <Text style={styles.sectionTitle}>Reseñas</Text>
-          <TouchableOpacity onPress={() => setReviewOpen(true)}>
+          <TouchableOpacity onPress={reviewForm.openCreate}>
             <Text style={styles.link}>Escribir reseña</Text>
           </TouchableOpacity>
         </View>
         {reviews.length === 0 ? (
           <Text style={styles.muted}>Sé el primero en dejar una reseña.</Text>
         ) : (
-          reviews.slice(0, 5).map((review) => <ReviewCard key={review.id} review={review} />)
+          reviews.slice(0, 5).map((review) => (
+            <ReviewCard key={review.id} review={review} onEdit={reviewForm.openEdit} onDelete={onDeleteReview} />
+          ))
         )}
       </ScrollView>
 
@@ -143,7 +154,12 @@ export function RestaurantDetailScreen({ navigation, route }) {
         </TouchableOpacity>
       ) : null}
 
-      <ReviewFormModal visible={reviewOpen} onClose={() => setReviewOpen(false)} onSubmit={onSubmitReview} />
+      <ReviewFormModal
+        visible={reviewForm.visible}
+        initialValues={reviewForm.initialValues}
+        onClose={reviewForm.close}
+        onSubmit={reviewForm.onSubmit}
+      />
     </View>
   );
 }

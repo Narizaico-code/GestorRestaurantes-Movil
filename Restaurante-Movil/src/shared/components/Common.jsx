@@ -3,6 +3,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import { FONTS, FONT_SIZE, RADIUS, SHADOWS, SPACING } from '../constants/theme';
 import { useThemeStore } from '../hooks/useThemeStore';
+import { IconCircle } from './IconCircle';
 
 // Spinner centrado a pantalla completa.
 export function LoadingSpinner({ message }) {
@@ -22,9 +23,7 @@ export function EmptyState({ icon = 'inbox', title = 'Sin datos', message, actio
   const styles = createStyles(colors);
   return (
     <View style={styles.empty}>
-      <View style={styles.emptyIcon}>
-        <MaterialIcons name={icon} size={32} color={colors.primary} />
-      </View>
+      <IconCircle icon={icon} size={64} style={styles.emptyIcon} />
       <Text style={styles.emptyTitle}>{title}</Text>
       {message ? <Text style={styles.muted}>{message}</Text> : null}
       {action ? <View style={styles.emptyAction}>{action}</View> : null}
@@ -113,15 +112,7 @@ const createStyles = (colors) => StyleSheet.create({
     padding: SPACING.xxl,
     gap: SPACING.sm,
   },
-  emptyIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: RADIUS.pill,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.xs,
-  },
+  emptyIcon: { marginBottom: SPACING.xs },
   emptyTitle: {
     fontSize: FONT_SIZE.lg,
     fontFamily: FONTS.displayBold,

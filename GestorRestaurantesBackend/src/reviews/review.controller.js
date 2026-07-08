@@ -87,6 +87,51 @@ export const getReviews = async (req, res) => {
   }
 }
 
+// Solo el autor puede editar su reseña, y únicamente dentro de los primeros
+// 3 minutos desde que la creó (evita que se reescriba el historial más tarde).
+const EDIT_WINDOW_MS = 3 * 60 * 1000
+
+export const updateReview = async (req, res) => {
+  try {
+    const { id } = req.params
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: 'ID de review inválido' })
+    }
+
+    const review = await Review.findById(id)
+    if (!review) {
+      return res.status(404).json({ success: false, message: 'Review no encontrada' })
+    }
+
+    const isOwner = review.userId && String(review.userId) === String(req.userId)
+    if (!isOwner) {
+      return res.status(403).json({ success: false, message: 'No tienes permiso para editar esta reseña' })
+    }
+
+    const elapsedMs = Date.now() - new Date(review.createdAt).getTime()
+    if (elapsedMs > EDIT_WINDOW_MS) {
+      return res.status(403).json({ success: false, message: 'El tiempo para editar esta reseña ya expiró (3 minutos)' })
+    }
+
+    const { rating, comment, userName } = req.body
+
+    if (rating !== undefined) {
+      if (Number(rating) < 1 || Number(rating) > 5) {
+        return res.status(400).json({ success: false, message: 'rating debe estar entre 1 y 5' })
+      }
+      review.rating = Number(rating)
+    }
+    if (comment !== undefined) review.comment = comment || null
+    if (userName !== undefined) review.userName = userName || 'Anónimo'
+
+    await review.save()
+    return res.status(200).json({ success: true, message: 'Reseña actualizada exitosamente', review })
+  } catch (err) {
+    console.error('updateReview error:', err)
+    return res.status(500).json({ success: false, message: 'Error actualizando reseña', error: err.message })
+  }
+}
+
 export const deleteReview = async (req, res) => {
   try {
     const { id } = req.params

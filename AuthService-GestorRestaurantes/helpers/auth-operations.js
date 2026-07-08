@@ -56,12 +56,16 @@ export const registerUserHelper = async (userData) => {
     let profilePictureToStore = profilePicture;
     if (profilePicture) {
       const uploadPath = config.upload.uploadPath;
+      // Normalizamos separadores solo para esta detección: en Windows, multer
+      // genera rutas con backslash (uploads\xxx.jpg), no forward-slash.
+      const normalizedForCheck = String(profilePicture).replace(/\\/g, '/');
+      const normalizedUploadPath = String(uploadPath).replace(/\\/g, '/');
 
       // Detectar si es un archivo local
       const isLocalFile =
-        profilePicture.includes('uploads/') ||
-        profilePicture.includes(uploadPath) ||
-        profilePicture.startsWith('./');
+        normalizedForCheck.includes('uploads/') ||
+        normalizedForCheck.includes(normalizedUploadPath) ||
+        normalizedForCheck.startsWith('./');
 
       if (isLocalFile) {
         try {

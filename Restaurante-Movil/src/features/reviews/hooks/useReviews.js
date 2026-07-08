@@ -12,6 +12,15 @@ export const mapReviewToViewModel = (raw) => ({
   createdAt: raw?.createdAt,
 });
 
+// Una reseña solo se puede editar dentro de los primeros 3 minutos de creada
+// (debe coincidir con EDIT_WINDOW_MS del backend en review.controller.js).
+export const REVIEW_EDIT_WINDOW_MS = 3 * 60 * 1000;
+
+export const canEditReview = (review) => {
+  if (!review?.createdAt) return false;
+  return Date.now() - new Date(review.createdAt).getTime() < REVIEW_EDIT_WINDOW_MS;
+};
+
 /**
  * Reseñas de un restaurante o de un platillo.
  * @param {Object} target - { restaurantId } o { menuId }.
@@ -69,5 +78,44 @@ export function useReviews({ restaurantId, menuId } = {}) {
     [fetchReviews, menuId, restaurantId]
   );
 
-  return { reviews, average, count: reviews.length, loading, error, refetch: fetchReviews, createReview };
+  // Edita una reseña propia. El backend rechaza la petición si ya pasaron los 3
+  // minutos de la ventana de edición o si no eres el autor.
+  const updateReview = useCallback(
+    async (reviewId, { rating, comment, userName }) => {
+      try {
+        await apiClient.put(`/reviews/${reviewId}`, { rating, comment, userName });
+        await fetchReviews();
+        return { ok: true };
+      } catch (err) {
+        return { ok: false, error: getApiError(err, 'No fue posible actualizar la reseña') };
+      }
+    },
+    [fetchReviews]
+  );
+
+  // Elimina una reseña propia (el backend valida que seas el autor o admin).
+  const deleteReview = useCallback(
+    async (reviewId) => {
+      try {
+        await apiClient.delete(`/reviews/${reviewId}`);
+        await fetchReviews();
+        return { ok: true };
+      } catch (err) {
+        return { ok: false, error: getApiError(err, 'No fue posible eliminar la reseña') };
+      }
+    },
+    [fetchReviews]
+  );
+
+  return {
+    reviews,
+    average,
+    count: reviews.length,
+    loading,
+    error,
+    refetch: fetchReviews,
+    createReview,
+    updateReview,
+    deleteReview,
+  };
 }
