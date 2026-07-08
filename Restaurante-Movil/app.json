@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Restaurante-Movil",
+    "slug": "Restaurante-Movil",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "restaurantemovil",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#7C2D12",
+        "foregroundImage": "./assets/images/icon.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.RestauranteMovil"
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#7C2D12",
+          "android": {
+            "image": "./assets/images/icon.png",
+            "imageWidth": 96
+          }
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app necesita acceso a tus fotos para tu foto de perfil."
+        }
+      ]
+    ]
+  }
+}

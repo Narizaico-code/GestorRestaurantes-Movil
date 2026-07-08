@@ -1,7 +1,7 @@
 'use strict'
 
 import { Router } from 'express'
-import { createReview, getReviewsByRestaurant, getReviewsByMenu, getReviews, deleteReview } from './review.controller.js'
+import { createReview, getReviewsByRestaurant, getReviewsByMenu, getReviews, updateReview, deleteReview } from './review.controller.js'
 import { uploadFieldImage } from '../../middlewares/file-uploader.js'
 import { validateJWT } from '../../middlewares/validate-JWT.js'
 
@@ -18,6 +18,9 @@ router.get('/menu/:menuId', getReviewsByMenu)
 
 // Listar todas las calificaciones
 router.get('/', getReviews)
+
+// Editar calificación propia (solo dentro de los primeros 3 minutos)
+router.put('/:id', validateJWT, uploadFieldImage.none(), updateReview)
 
 // Eliminar calificación
 router.delete('/:id', validateJWT, deleteReview)

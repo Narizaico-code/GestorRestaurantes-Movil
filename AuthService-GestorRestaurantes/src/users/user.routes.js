@@ -11,6 +11,7 @@ import {
 } from './user.controller.js';
 
 import { validateJWT } from '../../middlewares/validate-JWT.js';
+import { upload, handleUploadError } from '../../helpers/file-upload.js';
 import { findUserById } from '../../helpers/user-db.js';
 import { User } from './user.model.js';
 import { UserProfile, UserEmail } from './user.model.js';
@@ -19,8 +20,8 @@ import { ADMIN_ROLE, ADMIN_RESTAURANT_ROLE } from '../../helpers/role-constants.
 
 const router = Router();
 
-// PUT /api/v1/users/profile - Update user profile
-router.put('/profile', ...updateProfile);
+// PUT /api/v1/users/profile - Update user profile (foto opcional)
+router.put('/profile', upload.single('profilePicture'), handleUploadError, ...updateProfile);
 
 // POST /api/v1/users/change-password - Change password
 router.post('/change-password', ...updatePasswordController);
