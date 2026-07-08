@@ -11,6 +11,7 @@ import { RestaurantsScreen } from '../features/restaurants/screens/RestaurantsSc
 import { RestaurantDetailScreen } from '../features/restaurants/screens/RestaurantDetailScreen';
 import { ReservationsScreen } from '../features/reservations/screens/ReservationsScreen';
 import { NewReservationScreen } from '../features/reservations/screens/NewReservationScreen';
+import { EditReservationScreen } from '../features/reservations/screens/EditReservationScreen';
 import { ReservationDetailScreen } from '../features/reservations/screens/ReservationDetailScreen';
 import { OrdersScreen } from '../features/orders/screens/OrdersScreen';
 import { CartScreen } from '../features/orders/screens/CartScreen';
@@ -31,6 +32,7 @@ const S = {
   RestaurantDetail: withErrorBoundary(RestaurantDetailScreen),
   MyReservations: withErrorBoundary(ReservationsScreen),
   NewReservation: withErrorBoundary(NewReservationScreen),
+  EditReservation: withErrorBoundary(EditReservationScreen),
   ReservationDetail: withErrorBoundary(ReservationDetailScreen),
   MyOrders: withErrorBoundary(OrdersScreen),
   Cart: withErrorBoundary(CartScreen),
@@ -82,6 +84,7 @@ function ReservationsStack() {
     <ReservationsStackNav.Navigator screenOptions={getStackScreenOptions(colors)}>
       <ReservationsStackNav.Screen name="MyReservations" component={S.MyReservations} options={{ title: 'Mis Reservaciones' }} />
       <ReservationsStackNav.Screen name="NewReservation" component={S.NewReservation} options={{ title: 'Nueva Reservación' }} />
+      <ReservationsStackNav.Screen name="EditReservation" component={S.EditReservation} options={{ title: 'Editar Reservación' }} />
       <ReservationsStackNav.Screen name="ReservationDetail" component={S.ReservationDetail} options={{ title: 'Detalle de Reservación' }} />
     </ReservationsStackNav.Navigator>
   );

@@ -392,6 +392,42 @@ export const updateOrderStatus = async (req, res) => {
   }
 }
 
+export const cancelMyOrder = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.userId
+
+    const order = await Order.findById(id)
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' })
+    }
+
+    if (String(order.userId) !== String(userId)) {
+      return res.status(403).json({ success: false, message: 'No tienes permisos para cancelar este pedido' })
+    }
+
+    if (order.status !== 'EN_PREPARACION') {
+      return res.status(400).json({ success: false, message: 'Solo se pueden cancelar pedidos en preparación' })
+    }
+
+    try {
+      for (const item of order.items) {
+        await changeStock(item.menuId, order.restaurantId, item.quantity)
+      }
+    } catch (restockErr) {
+      console.error('Error restocking inventory:', restockErr)
+    }
+
+    order.status = 'CANCELADO'
+    await order.save()
+
+    return res.status(200).json({ success: true, message: 'Pedido cancelado correctamente', order })
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ success: false, message: 'Error al cancelar el pedido', error: err?.message })
+  }
+}
+
 export const updateOrder = async (req, res) => {
   try {
     const { id } = req.params
@@ -482,7 +518,8 @@ export default {
   getOrderById,
   getOrdersByRestaurant,
   updateOrderStatus,
-  updateOrder
+  updateOrder,
+  cancelMyOrder
 }
 
 

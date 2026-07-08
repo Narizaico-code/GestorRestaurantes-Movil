@@ -1,32 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiClient, buildFormData, getApiError } from '../../../shared/api';
-import { RESERVATION_STATUS_LABELS, RESERVATION_STATUS_TONES } from '../../../shared/constants';
+import { mapReservationToViewModel } from '../utils/reservationMapper';
 
-export const mapReservationToViewModel = (raw) => {
-  const status = raw?.status || 'PENDIENTE';
-  const tables = Array.isArray(raw?.tableId) ? raw.tableId : raw?.tableId ? [raw.tableId] : [];
-  return {
-    raw,
-    id: raw?._id || raw?.id,
-    restaurantId: raw?.restaurantId?._id || raw?.restaurantId || null,
-    restaurantName: raw?.restaurantId?.restaurantName || 'Restaurante',
-    tables: tables.map((t) => (typeof t === 'object' ? t?.tableName || 'Mesa' : 'Mesa')),
-    tableCount: tables.length,
-    numberPeople: Number(raw?.numberPeople ?? 1),
-    type: raw?.typeReservation || 'PERSONAL',
-    description: raw?.description || '',
-    coupon: raw?.coupon || null,
-    startDate: raw?.startDate || null,
-    endDate: raw?.endDate || null,
-    photo: raw?.photo || null,
-    status,
-    statusLabel: RESERVATION_STATUS_LABELS[status] || status,
-    statusTone: RESERVATION_STATUS_TONES[status] || 'neutral',
-  };
-};
+export { mapReservationToViewModel } from '../utils/reservationMapper';
 
-// Reservaciones del usuario autenticado + creación.
+// Reservaciones del usuario autenticado: listado, creación, edición y cancelación.
 export function useReservations() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,26 +34,29 @@ export function useReservations() {
 
   // Crea una reservación (multipart: puede llevar foto y tableId como array).
   const createReservation = useCallback(
-    async (form) => {
+    async (payload) => {
       try {
-        const formData = await buildFormData(
-          {
-            restaurantId: form.restaurantId,
-            tableId: form.tableId, // array → se serializa a JSON
-            numberPeople: form.numberPeople,
-            typeReservation: form.typeReservation,
-            description: form.description,
-            coupon: form.coupon,
-            startDate: form.startDate, // ISO string
-            endDate: form.endDate,
-          },
-          form.photo ? { uri: form.photo, field: 'photo' } : null
-        );
+        const formData = await buildFormData(payload, payload.photo ? { uri: payload.photo, field: 'photo' } : null);
         const res = await apiClient.post('/reservations/create', formData);
         await fetchReservations();
         return { ok: true, data: res.data };
       } catch (err) {
         return { ok: false, error: getApiError(err, 'No fue posible crear la reservación') };
+      }
+    },
+    [fetchReservations]
+  );
+
+  // Edita una reservación propia (PUT /reservations/:id, mismos campos que create).
+  const updateReservation = useCallback(
+    async (id, payload) => {
+      try {
+        const formData = await buildFormData(payload, payload.photo ? { uri: payload.photo, field: 'photo' } : null);
+        const res = await apiClient.put(`/reservations/${id}`, formData);
+        await fetchReservations();
+        return { ok: true, data: res.data };
+      } catch (err) {
+        return { ok: false, error: getApiError(err, 'No fue posible actualizar la reservación') };
       }
     },
     [fetchReservations]
@@ -94,5 +76,13 @@ export function useReservations() {
     [fetchReservations]
   );
 
-  return { reservations, loading, error, refetch: fetchReservations, createReservation, cancelReservation };
+  return {
+    reservations,
+    loading,
+    error,
+    refetch: fetchReservations,
+    createReservation,
+    updateReservation,
+    cancelReservation,
+  };
 }

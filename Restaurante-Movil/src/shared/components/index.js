@@ -4,5 +4,7 @@ export { Input } from './Input';
 export { Selector } from './Selector';
 export { PasswordRulesChecklist } from './PasswordRulesChecklist';
 export { LoadingSpinner, EmptyState, Card, Badge, Rating, Stepper } from './Common';
+export { DetailRow } from './DetailRow';
+export { FAB } from './FAB';
 export { GradientCard, BrandGradient } from './Gradient';
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
-import { Badge, Button, Card } from '../../../shared/components';
+import { Badge, Button, Card, DetailRow } from '../../../shared/components';
 import { RESERVATION_STATUS, RESERVATION_TYPE_LABELS } from '../../../shared/constants';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
@@ -19,7 +18,7 @@ export function ReservationDetailScreen({ navigation, route }) {
 
   if (!reservation) return null;
 
-  const canCancel = reservation.status === RESERVATION_STATUS.PENDIENTE;
+  const canModify = reservation.status === RESERVATION_STATUS.PENDIENTE;
 
   const onCancel = () =>
     confirmAction({
@@ -49,29 +48,20 @@ export function ReservationDetailScreen({ navigation, route }) {
       {reservation.photo ? <Image source={{ uri: reservation.photo }} style={styles.photo} /> : null}
 
       <Card style={styles.card}>
-        <DetailRow icon="calendar-today" label="Fecha" value={formatDate(reservation.startDate)} colors={colors} />
+        <DetailRow icon="calendar-today" label="Fecha" value={formatDate(reservation.startDate)} />
         <DetailRow
           icon="schedule"
           label="Horario"
           value={`${formatTime(reservation.startDate)} - ${formatTime(reservation.endDate)}`}
-          colors={colors}
         />
-        <DetailRow icon="group" label="Personas" value={String(reservation.numberPeople)} colors={colors} />
-        <DetailRow
-          icon="event-note"
-          label="Tipo"
-          value={RESERVATION_TYPE_LABELS[reservation.type] || reservation.type}
-          colors={colors}
-        />
+        <DetailRow icon="group" label="Personas" value={String(reservation.numberPeople)} />
+        <DetailRow icon="event-note" label="Tipo" value={RESERVATION_TYPE_LABELS[reservation.type] || reservation.type} />
         <DetailRow
           icon="table-restaurant"
           label="Mesas"
           value={reservation.tables.length ? reservation.tables.join(', ') : `${reservation.tableCount} mesa(s)`}
-          colors={colors}
         />
-        {reservation.coupon ? (
-          <DetailRow icon="local-offer" label="Cupón" value={reservation.coupon} colors={colors} last />
-        ) : null}
+        {reservation.coupon ? <DetailRow icon="local-offer" label="Cupón" value={reservation.coupon} last /> : null}
       </Card>
 
       {reservation.description ? (
@@ -81,23 +71,17 @@ export function ReservationDetailScreen({ navigation, route }) {
         </Card>
       ) : null}
 
-      {canCancel ? (
-        <Button title="Cancelar reservación" variant="danger" onPress={onCancel} loading={cancelling} />
+      {canModify ? (
+        <View style={styles.actions}>
+          <Button
+            title="Editar reservación"
+            variant="secondary"
+            onPress={() => navigation.navigate('EditReservation', { reservation })}
+          />
+          <Button title="Cancelar reservación" variant="danger" onPress={onCancel} loading={cancelling} />
+        </View>
       ) : null}
     </ScrollView>
-  );
-}
-
-function DetailRow({ icon, label, value, colors, last }) {
-  const styles = createStyles(colors);
-  return (
-    <View style={[styles.detailRow, last && styles.detailRowLast]}>
-      <View style={styles.detailLeft}>
-        <MaterialIcons name={icon} size={18} color={colors.primary} />
-        <Text style={styles.detailLabel}>{label}</Text>
-      </View>
-      <Text style={styles.detailValue}>{value}</Text>
-    </View>
   );
 }
 
@@ -108,18 +92,7 @@ const createStyles = (colors) => StyleSheet.create({
   title: { flex: 1, fontSize: FONT_SIZE.xl, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text },
   photo: { width: '100%', height: 180, borderRadius: RADIUS.lg, backgroundColor: colors.surfaceAlt },
   card: { gap: 0 },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: SPACING.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  detailRowLast: { borderBottomWidth: 0 },
-  detailLeft: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  detailLabel: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.textSecondary },
-  detailValue: { flex: 1, textAlign: 'right', fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.text },
+  actions: { gap: SPACING.sm },
   descLabel: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.semibold, fontWeight: '700', color: colors.textSecondary, marginBottom: SPACING.xs },
   descText: { fontSize: FONT_SIZE.sm, fontFamily: FONTS.body, color: colors.text, lineHeight: 20 },
 });

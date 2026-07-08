@@ -1,35 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apiClient, getApiError } from '../../../shared/api';
-import { ORDER_STATUS_LABELS, ORDER_STATUS_TONES, ORDER_TYPE_LABELS } from '../../../shared/constants';
+import { mapOrderToViewModel } from '../utils/orderMapper';
 
-export const mapOrderToViewModel = (raw) => {
-  const status = raw?.status || 'EN_PREPARACION';
-  const orderType = raw?.orderType || 'EN_RESTAURANTE';
-  const items = Array.isArray(raw?.items) ? raw.items : [];
-  return {
-    raw,
-    id: raw?._id || raw?.id,
-    restaurantName: raw?.restaurantId?.restaurantName || 'Restaurante',
-    items: items.map((it) => ({
-      menuName: it?.menuId?.menuName || it?.menuName || 'Platillo',
-      quantity: Number(it?.quantity ?? 1),
-      price: Number(it?.price ?? 0),
-    })),
-    itemCount: items.reduce((sum, it) => sum + Number(it?.quantity ?? 0), 0),
-    total: Number(raw?.total ?? 0),
-    coupon: raw?.coupon || null,
-    orderType,
-    orderTypeLabel: ORDER_TYPE_LABELS[orderType] || orderType,
-    deliveryAddress: raw?.deliveryAddress || null,
-    status,
-    statusLabel: ORDER_STATUS_LABELS[status] || status,
-    statusTone: ORDER_STATUS_TONES[status] || 'neutral',
-    createdAt: raw?.createdAt,
-  };
-};
+export { mapOrderToViewModel } from '../utils/orderMapper';
 
-// Pedidos del usuario autenticado + creación desde el carrito.
+// Pedidos del usuario autenticado: listado, creación y cancelación.
 export function useOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,5 +52,19 @@ export function useOrders() {
     [fetchOrders]
   );
 
-  return { orders, loading, error, refetch: fetchOrders, createOrder };
+  // Cancela un pedido propio, solo permitido mientras sigue EN_PREPARACION.
+  const cancelOrder = useCallback(
+    async (id) => {
+      try {
+        const res = await apiClient.put(`/orders/my-order/${id}/cancel`);
+        await fetchOrders();
+        return { ok: true, data: res.data };
+      } catch (err) {
+        return { ok: false, error: getApiError(err, 'No fue posible cancelar el pedido') };
+      }
+    },
+    [fetchOrders]
+  );
+
+  return { orders, loading, error, refetch: fetchOrders, createOrder, cancelOrder };
 }

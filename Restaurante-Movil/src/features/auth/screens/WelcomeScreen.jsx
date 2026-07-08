@@ -1,15 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Button } from '../../../shared/components';
 import { GRADIENTS, FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
+import { WelcomeFeature } from '../components/WelcomeFeature';
 
-const HIGHLIGHTS = [
-  { icon: 'restaurant-menu', text: 'Explora restaurantes y sus cartas' },
-  { icon: 'event-seat', text: 'Reserva tu mesa en segundos' },
-  { icon: 'delivery-dining', text: 'Pide a domicilio o para llevar' },
+const FEATURES = [
+  { icon: 'restaurant-menu', title: 'Explora restaurantes', description: 'Descubre cartas y menús cerca de ti.' },
+  { icon: 'event-seat', title: 'Reserva tu mesa', description: 'Aparta tu lugar en segundos.' },
+  { icon: 'delivery-dining', title: 'Pide a domicilio', description: 'A domicilio o para llevar, tú eliges.' },
 ];
 
 export function WelcomeScreen({ navigation }) {
@@ -18,49 +20,51 @@ export function WelcomeScreen({ navigation }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <LinearGradient
-      colors={GRADIENTS.hero}
-      start={GRADIENTS.start}
-      end={GRADIENTS.endDiagonal}
-      style={[styles.container, { paddingTop: insets.top + SPACING.xxl }]}
-    >
-      <View style={styles.top}>
+    <View style={styles.container}>
+      {/* Hero de marca */}
+      <LinearGradient
+        colors={GRADIENTS.hero}
+        start={GRADIENTS.start}
+        end={GRADIENTS.endDiagonal}
+        style={[styles.hero, { paddingTop: insets.top + SPACING.xxl }]}
+      >
         <View style={styles.brandBadge}>
-          <MaterialIcons name="restaurant" size={38} color={colors.white} />
+          <MaterialIcons name="restaurant" size={40} color={colors.white} />
         </View>
         <Text style={styles.brand}>Sabor a la Carta</Text>
         <Text style={styles.tagline}>Tu mesa favorita, siempre a un toque de distancia.</Text>
-      </View>
+      </LinearGradient>
 
-      <View style={styles.highlights}>
-        {HIGHLIGHTS.map((item) => (
-          <View key={item.text} style={styles.highlightRow}>
-            <View style={styles.highlightIcon}>
-              <MaterialIcons name={item.icon} size={20} color={colors.white} />
-            </View>
-            <Text style={styles.highlightText}>{item.text}</Text>
-          </View>
-        ))}
-      </View>
+      {/* Panel de bienvenida */}
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + SPACING.xl }]}>
+        <Text style={styles.sheetTitle}>Bienvenido 👋</Text>
+        <Text style={styles.sheetSubtitle}>Todo lo que necesitas para comer bien, en un solo lugar.</Text>
 
-      <View style={[styles.actions, { paddingBottom: insets.bottom + SPACING.xl }]}>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.navigate('Login')} activeOpacity={0.9}>
-          <Text style={styles.primaryButtonText}>Iniciar sesión</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Register')} activeOpacity={0.9}>
-          <Text style={styles.secondaryButtonText}>Crear cuenta</Text>
-        </TouchableOpacity>
+        <View style={styles.features}>
+          {FEATURES.map((feature) => (
+            <WelcomeFeature key={feature.title} {...feature} />
+          ))}
+        </View>
+
+        <View style={styles.actions}>
+          <Button title="Iniciar sesión" gradient onPress={() => navigation.navigate('Login')} />
+          <Button title="Crear cuenta" variant="secondary" onPress={() => navigation.navigate('Register')} />
+        </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const createStyles = (colors) => StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: SPACING.xl, justifyContent: 'space-between' },
-  top: { alignItems: 'center', marginTop: SPACING.xxl },
+  container: { flex: 1, backgroundColor: colors.background },
+  hero: {
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.xxxl,
+    alignItems: 'center',
+  },
   brandBadge: {
-    width: 84,
-    height: 84,
+    width: 88,
+    height: 88,
     borderRadius: RADIUS.pill,
     backgroundColor: 'rgba(255,255,255,0.16)',
     borderWidth: 1,
@@ -79,32 +83,24 @@ const createStyles = (colors) => StyleSheet.create({
     maxWidth: 300,
     lineHeight: 22,
   },
-  highlights: { gap: SPACING.md },
-  highlightRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.md },
-  highlightIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: RADIUS.md,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  sheet: {
+    flex: 1,
+    marginTop: -SPACING.xl,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    paddingHorizontal: SPACING.xl,
+    paddingTop: SPACING.xl,
+    justifyContent: 'space-between',
   },
-  highlightText: { flex: 1, color: 'rgba(255,255,255,0.92)', fontFamily: FONTS.medium, fontSize: FONT_SIZE.md },
-  actions: { gap: SPACING.md },
-  primaryButton: {
-    backgroundColor: colors.white,
-    paddingVertical: SPACING.lg,
-    borderRadius: RADIUS.lg,
-    alignItems: 'center',
+  sheetTitle: { fontSize: FONT_SIZE.xxl, fontFamily: FONTS.displayBold, fontWeight: '800', color: colors.text },
+  sheetSubtitle: {
+    fontSize: FONT_SIZE.sm,
+    fontFamily: FONTS.body,
+    color: colors.textSecondary,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.lg,
   },
-  primaryButtonText: { color: colors.primaryDark, fontSize: FONT_SIZE.lg, fontFamily: FONTS.bold, fontWeight: '700' },
-  secondaryButton: {
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.5)',
-    paddingVertical: SPACING.lg,
-    borderRadius: RADIUS.lg,
-    alignItems: 'center',
-  },
-  secondaryButtonText: { color: colors.white, fontSize: FONT_SIZE.lg, fontFamily: FONTS.bold, fontWeight: '700' },
+  features: { gap: SPACING.lg },
+  actions: { gap: SPACING.md, marginTop: SPACING.xl },
 });
