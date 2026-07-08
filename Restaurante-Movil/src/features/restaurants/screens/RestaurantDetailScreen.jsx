@@ -3,12 +3,13 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
-import { Button, LoadingSpinner, Rating } from '../../../shared/components';
+import { Button, Input, LoadingSpinner, Rating, Selector } from '../../../shared/components';
+import { MENU_CATEGORY_LABELS, MENU_CATEGORY_ORDER } from '../../../shared/constants';
 import { FONTS, FONT_SIZE, RADIUS, SPACING } from '../../../shared/constants/theme';
 import { useThemeStore } from '../../../shared/hooks/useThemeStore';
 import { useCartStore } from '../../../shared/store/cartStore';
 import { notify } from '../../../shared/utils/confirm';
-import { formatCurrency } from '../../../shared/utils/format';
+import { formatCurrency, formatTime } from '../../../shared/utils/format';
 import { MenuSection } from '../../menus/components/MenuSection';
 import { useMenus } from '../../menus/hooks/useMenus';
 import { ReviewCard } from '../../reviews/components/ReviewCard';
@@ -22,7 +23,16 @@ export function RestaurantDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const initial = route.params?.restaurant;
   const { restaurant } = useRestaurant(initial?.id, initial);
-  const { sections, loading: menusLoading } = useMenus(restaurant?.id);
+  const [menuQuery, setMenuQuery] = useState('');
+  const [menuCategory, setMenuCategory] = useState('ALL');
+  const [onlyAvailable, setOnlyAvailable] = useState(false);
+
+  const { sections, loading: menusLoading, lastUpdatedAt, refetch: refetchMenus } = useMenus(restaurant?.id, {
+    query: menuQuery,
+    category: menuCategory,
+    onlyAvailable,
+    pollingIntervalMs: 15000,
+  });
   const { reviews, average, count, createReview } = useReviews({ restaurantId: restaurant?.id });
 
   const addItem = useCartStore((s) => s.addItem);
@@ -61,6 +71,19 @@ export function RestaurantDetailScreen({ navigation, route }) {
     navigation.navigate('Reservas', { screen: 'NewReservation', params: { restaurant } });
 
   const goCart = () => navigation.navigate('Pedidos', { screen: 'Cart' });
+
+  const menuCategoryOptions = [
+    { value: 'ALL', label: 'Todas' },
+    ...MENU_CATEGORY_ORDER.map((category) => ({
+      value: category,
+      label: MENU_CATEGORY_LABELS[category] || category,
+    })),
+  ];
+
+  const availabilityOptions = [
+    { value: false, label: 'Todos' },
+    { value: true, label: 'Solo disponibles' },
+  ];
 
   if (!restaurant) return <LoadingSpinner message="Cargando restaurante..." />;
 
@@ -102,6 +125,37 @@ export function RestaurantDetailScreen({ navigation, route }) {
 
         {/* Carta */}
         <Text style={styles.sectionTitle}>Carta</Text>
+        <View style={styles.menuFiltersCard}>
+          <Input
+            leftIcon="search"
+            placeholder="Buscar platillo"
+            value={menuQuery}
+            onChangeText={setMenuQuery}
+            autoCapitalize="none"
+          />
+          <Selector
+            label="Categoría"
+            options={menuCategoryOptions}
+            value={menuCategory}
+            onChange={setMenuCategory}
+          />
+          <Selector
+            label="Disponibilidad"
+            options={availabilityOptions}
+            value={onlyAvailable}
+            onChange={setOnlyAvailable}
+          />
+          <View style={styles.realtimeRow}>
+            <Text style={styles.realtimeText}>
+              {lastUpdatedAt
+                ? `Disponibilidad actualizada: ${formatTime(lastUpdatedAt)}`
+                : 'Sincronizando disponibilidad...'}
+            </Text>
+            <TouchableOpacity onPress={refetchMenus}>
+              <Text style={styles.link}>Actualizar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
         {menusLoading ? (
           <Text style={styles.muted}>Cargando carta...</Text>
         ) : sections.length === 0 ? (
@@ -167,6 +221,27 @@ const createStyles = (colors) => StyleSheet.create({
     fontWeight: '700',
     color: colors.text,
     marginTop: SPACING.sm,
+  },
+
+  menuFiltersCard: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: RADIUS.lg,
+    padding: SPACING.md,
+    backgroundColor: colors.surface,
+    marginBottom: SPACING.xs,
+  },
+  realtimeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+  },
+  realtimeText: {
+    flex: 1,
+    fontSize: FONT_SIZE.xs,
+    fontFamily: FONTS.body,
+    color: colors.textMuted,
   },
 
   reviewsHeader: {
