@@ -6,8 +6,7 @@ const tableSchema = new mongoose.Schema(
     {
         tableName:{
             type: String,
-            required: [true, "nombre de mesa is required"],
-            unique: true
+            required: [true, "nombre de mesa is required"]
         },
 
         tableCapacity:{
@@ -34,6 +33,7 @@ const tableSchema = new mongoose.Schema(
     }
 )
 
+tableSchema.index({ tableName: 1, restaurantId: 1 }, { unique: true });
 tableSchema.index({ tableActive: 1, createdAt: -1 });
 tableSchema.index({ tableActive: 1, restaurantId: 1, createdAt: -1 });
 export default mongoose.model("Table", tableSchema);

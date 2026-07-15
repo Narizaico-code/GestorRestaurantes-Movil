@@ -1,0 +1,70 @@
+services:
+
+  mongodb:
+    image: mongo:7
+    container_name: gestor-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gestor-network
+
+  auth-service:
+    build:
+      context: ./AuthService-GestorRestaurantes
+      dockerfile: Dockerfile
+    container_name: gestor-auth
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    env_file:
+      - ./AuthService-GestorRestaurantes/.env.docker
+    volumes:
+      - auth_uploads:/app/uploads
+    networks:
+      - gestor-network
+
+  gestor-backend:
+    build:
+      context: ./GestorRestaurantesBackend
+      dockerfile: Dockerfile
+    container_name: gestor-backend
+    restart: unless-stopped
+    ports:
+      - "3006:3006"
+    env_file:
+      - ./GestorRestaurantesBackend/.env.docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - gestor-network
+
+  gestor-frontend:
+    build:
+      context: ./GestorRestaurantesFrontend
+      dockerfile: Dockerfile
+    container_name: gestor-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - gestor-backend
+    networks:
+      - gestor-network
+
+networks:
+  gestor-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  auth_uploads:
