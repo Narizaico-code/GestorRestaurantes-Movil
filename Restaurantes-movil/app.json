@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Restaurantes-movil",
-    "slug": "Restaurantes-movil",
+    "slug": "gestor-restaurantes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,7 +16,10 @@
         "foregroundImage": "./assets/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.RestauranteMovil"
+      "package": "com.anonymous.RestauranteMovil",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -43,6 +46,12 @@
           "photosPermission": "La app necesita acceso a tus fotos para tu foto de perfil."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e7e75077-80bf-4a40-949c-33015033ea7e"
+      }
+    },
+    "owner": "iosefsuarezs-team"
   }
 }
